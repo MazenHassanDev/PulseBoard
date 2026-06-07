@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,13 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+
+# Trust the deployed origins for CSRF (admin/session POSTs). Comma-separated,
+# each value must include the scheme, e.g. https://pulseboard-api.onrender.com
+CSRF_TRUSTED_ORIGINS = [
+    o for o in config('CSRF_TRUSTED_ORIGINS', default='').split(',') if o
+]
 
 
 # Application definition
@@ -48,6 +55,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,16 +88,29 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+# In production (Render) a single DATABASE_URL is provided. Locally we fall
+# back to the discrete DB_* variables from .env.
+DATABASE_URL = config('DATABASE_URL', default='')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=config('DB_SSL_REQUIRE', default=True, cast=bool),
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+        }
+    }
 
 # Redis Caching
 
@@ -99,13 +120,23 @@ CACHES = {
         'LOCATION': config('REDIS_URL', default='redis://localhost:6379/2'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # If Redis is unreachable, fall through to the database instead of
+            # erroring out the request.
+            'IGNORE_EXCEPTIONS': True,
         }
     }
 }
+DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 
-# CORS Settings (dev mode — allow all origins)
+# CORS Settings
+# In DEBUG we allow every origin for convenience. In production we only allow
+# the deployed frontend origin(s) listed in CORS_ALLOWED_ORIGINS (comma-separated,
+# each including the scheme, e.g. https://pulseboard-web.onrender.com).
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    o for o in config('CORS_ALLOWED_ORIGINS', default='').split(',') if o
+]
+CORS_ALLOW_ALL_ORIGINS = DEBUG or not CORS_ALLOWED_ORIGINS
 
 # DRF Settings
 
@@ -168,4 +199,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise serves the Django admin's static files in production.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
