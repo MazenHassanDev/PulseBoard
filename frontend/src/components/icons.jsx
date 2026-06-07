@@ -76,6 +76,12 @@ export const Close = (p) => (
   </svg>
 )
 
+export const Trash = (p) => (
+  <svg {...base} {...p}>
+    <path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+  </svg>
+)
+
 export const Dollar = (p) => (
   <svg {...base} {...p}>
     <path d="M12 3v18M16 7.5C16 5.6 14.2 4 12 4S8 5.6 8 7.5 9.8 11 12 11s4 1.6 4 3.5S14.2 18 12 18s-4-1.6-4-3.5" />

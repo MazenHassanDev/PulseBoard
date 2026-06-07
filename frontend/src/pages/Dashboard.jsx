@@ -13,6 +13,23 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [explaining, setExplaining] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+
+  const handleDelete = async (campaign) => {
+    if (!window.confirm(`Delete "${campaign.name}"? This can't be undone.`)) {
+      return
+    }
+    setDeletingId(campaign.id)
+    setError('')
+    try {
+      await api.delete(`/api/campaigns/${campaign.id}/`)
+      setCampaigns((prev) => prev.filter((c) => c.id !== campaign.id))
+    } catch {
+      setError('Could not delete that campaign. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     api
@@ -102,7 +119,12 @@ export default function Dashboard() {
 
           {/* Table */}
           <div className="mt-6">
-            <CampaignTable campaigns={campaigns} onExplain={setExplaining} />
+            <CampaignTable
+              campaigns={campaigns}
+              onExplain={setExplaining}
+              onDelete={handleDelete}
+              deletingId={deletingId}
+            />
           </div>
         </>
       )}

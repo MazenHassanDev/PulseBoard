@@ -7,7 +7,7 @@ import {
   roasLabel,
   roasTone,
 } from '../lib/format'
-import { Search, ChevronDown, ArrowDown, Sparkle } from './icons'
+import { Search, ChevronDown, ArrowDown, Sparkle, Trash } from './icons'
 
 const TONE_CLASSES = {
   good: 'bg-good/15 text-good',
@@ -49,7 +49,7 @@ const COLUMNS = [
   { key: 'roas', label: 'ROAS', numeric: true },
 ]
 
-export default function CampaignTable({ campaigns, onExplain }) {
+export default function CampaignTable({ campaigns, onExplain, onDelete, deletingId }) {
   const [query, setQuery] = useState('')
   const [platform, setPlatform] = useState('all')
   const [sort, setSort] = useState({ key: 'roas', dir: 'desc' })
@@ -222,13 +222,27 @@ export default function CampaignTable({ campaigns, onExplain }) {
                     <RoasBadge value={c.roas} />
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <button
-                      onClick={() => onExplain(c)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-brand/15 px-2.5 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/25"
-                    >
-                      <Sparkle className="h-3.5 w-3.5" />
-                      Explain
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => onExplain(c)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-brand/15 px-2.5 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/25"
+                      >
+                        <Sparkle className="h-3.5 w-3.5" />
+                        Explain
+                      </button>
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(c)}
+                          disabled={deletingId === c.id}
+                          title="Delete campaign"
+                          aria-label={`Delete ${c.name}`}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-bad/15 px-2.5 py-1.5 text-xs font-semibold text-bad transition hover:bg-bad/25 disabled:opacity-50"
+                        >
+                          <Trash className="h-3.5 w-3.5" />
+                          {deletingId === c.id ? 'Deleting…' : 'Delete'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
