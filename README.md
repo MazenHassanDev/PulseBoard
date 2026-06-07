@@ -47,7 +47,6 @@ PulseBoard/
 ├── frontend/            # React + Vite app
 │   └── src/
 ├── render.yaml          # Render Blueprint (all four resources)
-├── sample_campaigns.csv # example CSV for the bulk import
 ├── .env.example         # backend env template
 └── frontend/.env.example
 ```
@@ -125,9 +124,6 @@ static frontend.
    build time), and the API after setting CORS. Create a user via the app's
    register page or `/admin`.
 
-> **Notes on the free tier:** the Postgres instance expires after ~30 days, and
-> the free web service spins down when idle — the first request after a pause
-> can take ~30–60s to wake. Both are fine for a demo.
 
 ---
 
@@ -165,4 +161,3 @@ static frontend.
   as a single shared-password screen in front of the app. The per-user login still
   protects each workspace's data behind it.
 
-See [`WRITEUP.md`](./WRITEUP.md) for the short approach/tradeoffs writeup.
