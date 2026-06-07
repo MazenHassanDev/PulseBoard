@@ -49,7 +49,7 @@ const COLUMNS = [
   { key: 'roas', label: 'ROAS', numeric: true },
 ]
 
-export default function CampaignTable({ campaigns, onExplain, onDelete, deletingId }) {
+export default function CampaignTable({ campaigns, onExplain, onDelete }) {
   const [query, setQuery] = useState('')
   const [platform, setPlatform] = useState('all')
   const [sort, setSort] = useState({ key: 'roas', dir: 'desc' })
@@ -233,13 +233,11 @@ export default function CampaignTable({ campaigns, onExplain, onDelete, deleting
                       {onDelete && (
                         <button
                           onClick={() => onDelete(c)}
-                          disabled={deletingId === c.id}
                           title="Delete campaign"
                           aria-label={`Delete ${c.name}`}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-bad/15 px-2.5 py-1.5 text-xs font-semibold text-bad transition hover:bg-bad/25 disabled:opacity-50"
+                          className="inline-flex items-center justify-center rounded-lg border border-line-soft bg-panel-2 p-2 text-zinc-500 transition hover:border-bad/40 hover:bg-bad/15 hover:text-bad"
                         >
-                          <Trash className="h-3.5 w-3.5" />
-                          {deletingId === c.id ? 'Deleting…' : 'Delete'}
+                          <Trash className="h-4 w-4" />
                         </button>
                       )}
                     </div>

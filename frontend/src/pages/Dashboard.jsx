@@ -5,6 +5,7 @@ import StatCard from '../components/StatCard'
 import CampaignChart from '../components/CampaignChart'
 import CampaignTable from '../components/CampaignTable'
 import ExplainerModal from '../components/ExplainerModal'
+import DeleteModal from '../components/DeleteModal'
 import { Dollar, Receipt, TrendUp, Target, Upload, Plus } from '../components/icons'
 import { compactNumber, money, roasLabel } from '../lib/format'
 
@@ -13,21 +14,21 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [explaining, setExplaining] = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
-  const handleDelete = async (campaign) => {
-    if (!window.confirm(`Delete "${campaign.name}"? This can't be undone.`)) {
-      return
-    }
-    setDeletingId(campaign.id)
+  const confirmDelete = async () => {
+    if (!pendingDelete) return
+    setDeleting(true)
     setError('')
     try {
-      await api.delete(`/api/campaigns/${campaign.id}/`)
-      setCampaigns((prev) => prev.filter((c) => c.id !== campaign.id))
+      await api.delete(`/api/campaigns/${pendingDelete.id}/`)
+      setCampaigns((prev) => prev.filter((c) => c.id !== pendingDelete.id))
+      setPendingDelete(null)
     } catch {
       setError('Could not delete that campaign. Please try again.')
     } finally {
-      setDeletingId(null)
+      setDeleting(false)
     }
   }
 
@@ -122,8 +123,7 @@ export default function Dashboard() {
             <CampaignTable
               campaigns={campaigns}
               onExplain={setExplaining}
-              onDelete={handleDelete}
-              deletingId={deletingId}
+              onDelete={setPendingDelete}
             />
           </div>
         </>
@@ -131,6 +131,15 @@ export default function Dashboard() {
 
       {explaining && (
         <ExplainerModal campaign={explaining} onClose={() => setExplaining(null)} />
+      )}
+
+      {pendingDelete && (
+        <DeleteModal
+          campaign={pendingDelete}
+          deleting={deleting}
+          onConfirm={confirmDelete}
+          onClose={() => setPendingDelete(null)}
+        />
       )}
     </div>
   )
