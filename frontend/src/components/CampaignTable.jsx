@@ -225,7 +225,7 @@ export default function CampaignTable({ campaigns, onExplain, onDelete }) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onExplain(c)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-brand/15 px-2.5 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/25"
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-brand/15 px-2.5 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/25"
                       >
                         <Sparkle className="h-3.5 w-3.5" />
                         Explain
@@ -235,7 +235,7 @@ export default function CampaignTable({ campaigns, onExplain, onDelete }) {
                           onClick={() => onDelete(c)}
                           title="Delete campaign"
                           aria-label={`Delete ${c.name}`}
-                          className="inline-flex items-center justify-center rounded-lg border border-line-soft bg-panel-2 p-2 text-zinc-500 transition hover:border-bad/40 hover:bg-bad/15 hover:text-bad"
+                          className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-line-soft bg-panel-2 p-2 text-zinc-500 transition hover:border-bad/40 hover:bg-bad/15 hover:text-bad"
                         >
                           <Trash className="h-4 w-4" />
                         </button>
